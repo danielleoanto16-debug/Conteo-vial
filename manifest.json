@@ -1,0 +1,16 @@
+{
+  "name": "Reporte Vial Pro",
+  "short_name": "VialPro",
+  "description": "Calculador y generador de reportes de tráfico vial",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f4f7f6",
+  "theme_color": "#2c3e50",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2555/2555013.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

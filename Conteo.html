@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Vial Pro</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Reporte Vial">
+    <meta name="apple-mobile-web-app-title" content="Reporte Vial">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="msapplication-navbutton-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <script>
+      // Registro del Service Worker para habilitar la instalación
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(err => console.log('Error:', err));
+        });
+      }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root { --azul: #2c3e50; --celeste: #3498db; --verde: #27ae60; --rojo: #e74c3c; --gris: #f4f7f6; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--gris); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .contenedor { background: white; padding: 25px; border-radius: 15px; width: 100%; max-width: 450px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); text-align: center; }
+        input { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        button { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-full { width: 100%; margin-top: 10px; font-size: 14px; }
+        .btn-inicio { background: var(--azul); color: white; }
+        .btn-mas { background: var(--verde); color: white; width: 60px; height: 60px; border-radius: 50%; font-size: 24px; }
+        .btn-menos { background: #bdc3c7; color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 20px; }
+        .btn-del { background: var(--rojo); color: white; padding: 5px 10px; font-size: 12px; }
+        .fila-vehiculo { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .conteo-num { font-size: 22px; font-weight: bold; color: var(--azul); }
+        .reloj-badge { display: inline-block; padding: 8px 15px; border-radius: 20px; background: var(--azul); color: white; font-size: 12px; margin: 10px 0; }
+        .card-historial { background: #f9f9f9; padding: 12px; margin-top: 10px; border-radius: 8px; border-left: 4px solid var(--celeste); text-align: left; position: relative; }
+        .item-lista { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <div id="p1" class="contenedor">
+        <h2>📁 Mis Proyectos</h2>
+        <input type="text" id="nomPro" placeholder="Nuevo punto de control...">
+        <button class="btn-inicio btn-full" onclick="crear()">+ Crear Proyecto</button>
+        <div id="listaPro" style="margin-top:20px;"></div>
+    </div>
+
+    <div id="p2" class="contenedor" style="display:none">
+        <h3 id="txtTit"></h3>
+        <div id="txtReloj" class="reloj-badge">Esperando...</div>
+        
+        <div id="controles">
+            <div class="fila-vehiculo">
+                <div style="text-align:left">🚗 <b>Sedán</b><br><span id="c-sedan" class="conteo-num">0</span></div>
+                <div><button class="btn-menos" onclick="add('sedan',-1)">-</button><button class="btn-mas" onclick="add('sedan',1)">+</button></div>
+            </div>
+            <div class="fila-vehiculo">
+                <div style="text-align:left">🛻 <b>Pickup</b><br><span id="c-pickup" class="conteo-num">0</span></div>
+                <div><button class="btn-menos" onclick="add('pickup',-1)">-</button><button class="btn-mas" onclick="add('pickup',1)">+</button></div>
+            </div>
+            <div class="fila-vehiculo">
+                <div style="text-align:left">🚛 <b>C-cito</b><br><span id="c-mini" class="conteo-num">0</span></div>
+                <div><button class="btn-menos" onclick="add('mini',-1)">-</button><button class="btn-mas" onclick="add('mini',1)">+</button></div>
+            </div>
+            <div class="fila-vehiculo">
+                <div style="text-align:left">🚚 <b>Camión</b><br><span id="c-truck" class="conteo-num">0</span></div>
+                <div><button class="btn-menos" onclick="add('truck',-1)">-</button><button class="btn-mas" onclick="add('truck',1)">+</button></div>
+            </div>
+            <div class="fila-vehiculo">
+                <div style="text-align:left">🛣️ <b>Rastra</b><br><span id="c-trailer" class="conteo-num">0</span></div>
+                <div><button class="btn-menos" onclick="add('trailer',-1)">-</button><button class="btn-mas" onclick="add('trailer',1)">+</button></div>
+            </div>
+        </div>
+
+        <button style="background:var(--celeste); color:white" class="btn-full" onclick="saveBloque()">✅ FINALIZAR BLOQUE</button>
+        <button id="btnPDF" style="background:var(--azul); color:white" class="btn-full" onclick="doPDF()">📄 GENERAR REPORTE PDF</button>
+        <button style="background:#95a5a6; color:white; margin-top:15px" class="btn-full" onclick="goHome()">🏠 VOLVER</button>
+
+        <div id="listHist" style="margin-top:30px; text-align:left;"></div>
+    </div>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('vial_apk_v1')) || [];
+    let cur = null;
+    let counts = {sedan:0, pickup:0, mini:0, truck:0, trailer:0};
+    let hIni = null;
+
+    function save() { localStorage.setItem('vial_apk_v1', JSON.stringify(db)); }
+    function goHome() { document.getElementById('p1').style.display='block'; document.getElementById('p2').style.display='none'; renderHome(); }
+
+    function crear() {
+        let n = document.getElementById('nomPro').value;
+        if(!n) return alert("Nombre requerido");
+        cur = { id: Date.now(), nombre: n, bloques: [] };
+        db.push(cur); save(); openP(cur.id);
+        document.getElementById('nomPro').value = "";
+    }
+
+    function openP(id) {
+        cur = db.find(p => p.id === id);
+        document.getElementById('txtTit').innerText = cur.nombre;
+        document.getElementById('p1').style.display='none';
+        document.getElementById('p2').style.display='block';
+        resetC(); renderHist();
+    }
+
+    function delP(id) {
+        if(confirm("¿Eliminar este proyecto y todos sus datos?")) {
+            db = db.filter(p => p.id !== id);
+            save(); renderHome();
+        }
+    }
+
+    function delB(idx) {
+        if(confirm("¿Eliminar este tramo del historial?")) {
+            cur.bloques.splice(idx, 1);
+            save(); renderHist();
+        }
+    }
+
+    function add(t, v) {
+        if(v > 0 && !hIni) {
+            hIni = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('txtReloj').innerText = "Iniciado: " + hIni;
+            document.getElementById('txtReloj').style.background = "#27ae60";
+        }
+        if(counts[t] + v < 0) return;
+        counts[t] += v;
+        document.getElementById('c-'+t).innerText = counts[t];
+    }
+
+    function saveBloque() {
+        if(!hIni) return alert("Sin datos.");
+        cur.bloques.push({
+            ini: hIni,
+            fin: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+            datos: {...counts}
+        });
+        save(); resetC(); renderHist();
+    }
+
+    function resetC() {
+        counts = {sedan:0, pickup:0, mini:0, truck:0, trailer:0};
+        hIni = null;
+        document.querySelectorAll('.conteo-num').forEach(e => e.innerText = "0");
+        document.getElementById('txtReloj').innerText = "Esperando vehículo...";
+        document.getElementById('txtReloj').style.background = "#2c3e50";
+    }
+
+    function renderHist() {
+        let h = document.getElementById('listHist');
+        h.innerHTML = "<h4>Historial de Tramos</h4>";
+        cur.bloques.slice().reverse().forEach((b, i) => {
+            let realIdx = cur.bloques.length - 1 - i;
+            h.innerHTML += `<div class="card-historial">
+                <button class="btn-del" style="position:absolute; right:10px; top:10px;" onclick="delB(${realIdx})">X</button>
+                <b>Tramo #${realIdx + 1}</b> (${b.ini} - ${b.fin})<br>
+                🚗:${b.datos.sedan} | 🛻:${b.datos.pickup} | 🚛:${b.datos.mini} | 🚚:${b.datos.truck} | 🛣️:${b.datos.trailer}
+            </div>`;
+        });
+    }
+
+    function renderHome() {
+        let l = document.getElementById('listaPro');
+        l.innerHTML = "";
+        db.slice().reverse().forEach(p => {
+            l.innerHTML += `<div class="item-lista">
+                <span><b>${p.nombre}</b></span>
+                <div>
+                    <button onclick="openP(${p.id})" style="background:var(--celeste); color:white;">Abrir</button>
+                    <button onclick="delP(${p.id})" style="background:var(--rojo); color:white;">🗑️</button>
+                </div>
+            </div>`;
+        });
+    }
+
+    function doPDF() {
+        if(cur.bloques.length === 0) return alert("No hay datos.");
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(20); doc.text("REPORTE VIAL: " + cur.nombre.toUpperCase(), 105, 20, {align:"center"});
+
+            let f = []; let t = {s:0, p:0, m:0, c:0, r:0};
+            cur.bloques.forEach((b, i) => {
+                f.push([i+1, b.ini+"-"+b.fin, b.datos.sedan, b.datos.pickup, b.datos.mini, b.datos.truck, b.datos.trailer]);
+                t.s += b.datos.sedan; t.p += b.datos.pickup; t.m += b.datos.mini; t.c += b.datos.truck; t.r += b.datos.trailer;
+            });
+
+            doc.autoTable({ head:[['N°','Hora','S','P','Cm','C','R']], body:f, startY:35, theme:'grid' });
+
+            let totalG = t.s+t.p+t.m+t.c+t.r;
+            let finalY = doc.lastAutoTable.finalY + 10;
+            doc.setFontSize(14); doc.text("RESUMEN GENERAL (Total: "+totalG+")", 14, finalY);
+
+            doc.autoTable({
+                head:[['Tipo','Cant.',' %']],
+                body:[
+                    ['Sedanes', t.s, ((t.s/totalG)*100||0).toFixed(1)+'%'],
+                    ['Pickups', t.p, ((t.p/totalG)*100||0).toFixed(1)+'%'],
+                    ['C-citos', t.m, ((t.m/totalG)*100||0).toFixed(1)+'%'],
+                    ['Camiones', t.c, ((t.c/totalG)*100||0).toFixed(1)+'%'],
+                    ['Rastras', t.r, ((t.r/totalG)*100||0).toFixed(1)+'%']
+                ],
+                startY: finalY + 5, theme:'grid'
+            });
+
+            let gy = doc.lastAutoTable.finalY + 45;
+            if(gy > 230) { doc.addPage(); gy = 50; }
+            doc.setFontSize(16); doc.text("DISTRIBUCIÓN VISUAL", 105, gy - 25, {align:"center"});
+            const cols = [[52,152,219],[46,204,113],[230,126,34],[155,89,182],[149,165,166]];
+            const labs = ['Sedán','Pickup','C-cito','Camión','Rastra'];
+            const vals = [t.s, t.p, t.m, t.c, t.r];
+            let ang = 0;
+            vals.forEach((v, i) => {
+                if(v === 0) return;
+                let p = v/totalG; let a = p * 360;
+                doc.setFillColor(cols[i][0], cols[i][1], cols[i][2]);
+                doc.pie(105, gy, 35, ang, ang + a, 'F');
+                let rad = (ang + (a/2)) * (Math.PI/180);
+                let x2 = 105 + Math.cos(rad)*45; let y2 = gy + Math.sin(rad)*45;
+                doc.setDrawColor(150); doc.line(105+Math.cos(rad)*37, gy+Math.sin(rad)*37, x2, y2);
+                doc.setFontSize(9); doc.text(`${labs[i]} (${(p*100).toFixed(1)}%)`, x2+(Math.cos(rad)>0?2:-2), y2, {align:Math.cos(rad)>0?'left':'right'});
+                ang += a;
+            });
+
+            const pdfData = doc.output('bloburl');
+            window.open(pdfData, '_blank');
+            doc.save("Reporte_"+cur.nombre+".pdf");
+
+        } catch(e) { alert("Error PDF: " + e.message); }
+    }
+
+    renderHome();
+</script>
+</body>
+</html>
