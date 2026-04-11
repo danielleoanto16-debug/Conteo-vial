@@ -1,5 +1,5 @@
 {
-  "name": "Reporte Vial Pro",
+  "name": "Conteo Vehicular",
   "short_name": "Conteo Vehicular",
   "description": "Calculador y generador de reportes de tráfico vial",
   "start_url": "index.html",
