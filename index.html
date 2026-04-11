@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte Vial Pro</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2c3e50">
+
+    <script>
+      // Registro del Service Worker para habilitar el botón de instalar
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('Service Worker listo'))
+            .catch(err => console.log('Error al registrar SW', err));
+        });
+      }
+    </script>
+
     <style>
         :root { --azul: #2c3e50; --celeste: #3498db; --verde: #27ae60; --rojo: #e74c3c; --gris: #f4f7f6; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--gris); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
@@ -39,7 +56,6 @@
         .reloj-badge { display: inline-block; padding: 8px 15px; border-radius: 20px; background: var(--azul); color: white; font-size: 12px; margin: 10px 0; }
         .card-historial { background: #f9f9f9; padding: 12px; margin-top: 10px; border-radius: 8px; border-left: 4px solid var(--celeste); text-align: left; position: relative; }
         
-        /* Estilo original de la lista de proyectos */
         .item-lista { background: #fff; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #ddd; text-align: left; }
         .btn-lista { width: 100%; margin-top: 5px; padding: 10px; border-radius: 5px; font-size: 14px; }
     </style>
