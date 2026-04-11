@@ -1,4 +1,3 @@
-self.addEventListener('fetch', function(event) {
-  // Esto permite que la app funcione incluso con internet lento
-  event.respondWith(fetch(event.request));
+self.addEventListener('fetch', (event) => {
+  // Sin esto, Android no cree que es una App
 });
