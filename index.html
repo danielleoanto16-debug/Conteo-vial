@@ -11,7 +11,6 @@
     <meta name="theme-color" content="#2c3e50">
 
     <script>
-      // Registro del Service Worker para habilitar el botón de instalar
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('sw.js')
@@ -32,7 +31,6 @@
         .btn-full { width: 100%; margin-top: 10px; font-size: 14px; padding: 12px; border-radius: 8px; }
         .btn-inicio { background: var(--azul); color: white; }
         
-        /* Botones + y - Simétricos */
         .controles-w { display: flex; align-items: center; gap: 10px; }
         .btn-mas { background: var(--verde); color: white; width: 55px; height: 55px; border-radius: 50%; font-size: 28px; padding: 0; }
         .btn-menos { background: var(--rojo); color: white; width: 55px; height: 55px; border-radius: 50%; font-size: 28px; padding: 0; }
@@ -54,7 +52,7 @@
         .fila-vehiculo { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
         .conteo-num { font-size: 22px; font-weight: bold; color: var(--azul); }
         .reloj-badge { display: inline-block; padding: 8px 15px; border-radius: 20px; background: var(--azul); color: white; font-size: 12px; margin: 10px 0; }
-        .card-historial { background: #f9f9f9; padding: 12px; margin-top: 10px; border-radius: 8px; border-left: 4px solid var(--celeste); text-align: left; position: relative; }
+        .card-historial { background: #f9f9f9; padding: 12px; margin-top: 10px; border-radius: 8px; border-left: 4px solid var(--celeste); text-align: left; position: relative; font-size: 13px; }
         
         .item-lista { background: #fff; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #ddd; text-align: left; }
         .btn-lista { width: 100%; margin-top: 5px; padding: 10px; border-radius: 5px; font-size: 14px; }
@@ -74,6 +72,14 @@
         <div id="txtReloj" class="reloj-badge">Esperando...</div>
         
         <div id="controles">
+            <div class="fila-vehiculo">
+                <div style="text-align:left">🚶 <b>Persona</b><br><span id="c-persona" class="conteo-num">0</span></div>
+                <div class="controles-w"><button class="btn-menos" onclick="add('persona',-1)">-</button><button class="btn-mas" onclick="add('persona',1)">+</button></div>
+            </div>
+            <div class="fila-vehiculo">
+                <div style="text-align:left">🏍️ <b>Moto</b><br><span id="c-moto" class="conteo-num">0</span></div>
+                <div class="controles-w"><button class="btn-menos" onclick="add('moto',-1)">-</button><button class="btn-mas" onclick="add('moto',1)">+</button></div>
+            </div>
             <div class="fila-vehiculo">
                 <div style="text-align:left">🚗 <b>Sedán</b><br><span id="c-sedan" class="conteo-num">0</span></div>
                 <div class="controles-w"><button class="btn-menos" onclick="add('sedan',-1)">-</button><button class="btn-mas" onclick="add('sedan',1)">+</button></div>
@@ -110,7 +116,7 @@
 <script>
     let db = JSON.parse(localStorage.getItem('vial_apk_v1')) || [];
     let cur = null;
-    let counts = {sedan:0, pickup:0, mini:0, truck:0, bus:0, trailer:0};
+    let counts = {persona:0, moto:0, sedan:0, pickup:0, mini:0, truck:0, bus:0, trailer:0};
     let hIni = null;
 
     function save() { localStorage.setItem('vial_apk_v1', JSON.stringify(db)); }
@@ -159,7 +165,7 @@
     }
 
     function resetC() {
-        counts = {sedan:0, pickup:0, mini:0, truck:0, bus:0, trailer:0}; hIni = null;
+        counts = {persona:0, moto:0, sedan:0, pickup:0, mini:0, truck:0, bus:0, trailer:0}; hIni = null;
         document.querySelectorAll('.conteo-num').forEach(e => e.innerText = "0");
         document.getElementById('txtReloj').innerText = "Esperando...";
         document.getElementById('txtReloj').style.background = "#2c3e50";
@@ -172,7 +178,7 @@
         cur.bloques.slice().reverse().forEach((b, i) => {
             let rIdx = cur.bloques.length - 1 - i;
             let d = b.datos;
-            h.innerHTML += `<div class="card-historial"><button class="btn-del" style="position:absolute; right:10px; top:10px;" onclick="delB(${rIdx})">X</button><b>Tramo #${rIdx + 1}</b> (${b.ini} - ${b.fin})<br>🚗:${d.sedan || 0} | 🛻:${d.pickup || 0} | 🚛:${d.mini || 0} | 🚚:${d.truck || 0} | 🚌:${d.bus || 0} | 🛣️:${d.trailer || 0}</div>`;
+            h.innerHTML += `<div class="card-historial"><button class="btn-del" style="position:absolute; right:10px; top:10px;" onclick="delB(${rIdx})">X</button><b>T#${rIdx + 1}</b> (${b.ini}-${b.fin})<br>🚶:${d.persona||0}|🏍️:${d.moto||0}|🚗:${d.sedan||0}|🛻:${d.pickup||0}|🚛:${d.mini||0}|🚚:${d.truck||0}|🚌:${d.bus||0}|🛣️:${d.trailer||0}</div>`;
         });
     }
 
@@ -190,62 +196,69 @@
 
     function generarReporteHTML() {
         if(!cur || cur.bloques.length === 0) return alert("No hay datos.");
-        let t = {s:0, p:0, m:0, c:0, b:0, r:0};
+        let t = {per:0, mot:0, sed:0, pic:0, min:0, tru:0, bus:0, tra:0};
         let tablaFilas = "";
         cur.bloques.forEach((bl, i) => {
-            let ds = bl.datos.sedan || 0, dp = bl.datos.pickup || 0, dm = bl.datos.mini || 0, dc = bl.datos.truck || 0, dbus = bl.datos.bus || 0, dr = bl.datos.trailer || 0;
-            tablaFilas += `<tr><td>${i+1}</td><td>${bl.ini} - ${bl.fin}</td><td>${ds}</td><td>${dp}</td><td>${dm}</td><td>${dc}</td><td>${dbus}</td><td>${dr}</td></tr>`;
-            t.s += ds; t.p += dp; t.m += dm; t.c += dc; t.b += dbus; t.r += dr;
+            let d = bl.datos;
+            let subTotal = (d.persona||0) + (d.moto||0) + (d.sedan||0) + (d.pickup||0) + (d.mini||0) + (d.truck||0) + (d.bus||0) + (d.trailer||0);
+            
+            tablaFilas += `<tr><td>${i+1}</td><td>${bl.ini}-${bl.fin}</td><td>${d.persona||0}</td><td>${d.moto||0}</td><td>${d.sedan||0}</td><td>${d.pickup||0}</td><td>${d.mini||0}</td><td>${d.truck||0}</td><td>${d.bus||0}</td><td>${d.trailer||0}</td><td style="background:#ddd"><b>${subTotal}</b></td></tr>`;
+            
+            t.per += d.persona||0; t.mot += d.moto||0; t.sed += d.sedan||0; t.pic += d.pickup||0; t.min += d.mini||0; t.tru += d.truck||0; t.bus += d.bus||0; t.tra += d.trailer||0;
         });
-        let totalG = t.s + t.p + t.m + t.c + t.b + t.r;
-        const calcPorc = (val) => totalG > 0 ? ((val/totalG)*100).toFixed(1) + "%" : "0.0%";
+        let totalG = t.per + t.mot + t.sed + t.pic + t.min + t.tru + t.bus + t.tra;
+        
         let ventana = window.open('', '_blank');
         ventana.document.write(`
             <html>
             <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Reporte ${cur.nombre}</title>
                 <style>
-                    body { font-family: sans-serif; padding: 20px; color: #333; display: flex; flex-direction: column; align-items: center; }
-                    .report-container { width: 100%; max-width: 800px; }
-                    h1 { text-align: center; color: #2c3e50; margin-top: 0; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-                    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+                    body { font-family: sans-serif; padding: 5px; color: #333; display: flex; flex-direction: column; align-items: center; margin: 0; }
+                    .report-container { width: 100%; max-width: 98%; box-sizing: border-box; }
+                    h1 { text-align: center; color: #2c3e50; margin: 10px 0; font-size: 1.2rem; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 9px; }
+                    th, td { border: 1px solid #ddd; padding: 4px; text-align: center; }
                     th { background-color: #2c3e50; color: white; }
-                    .resumen { margin-top: 20px; background: #f9f9f9; padding: 15px; border-radius: 10px; border: 1px solid #ddd; }
-                    .final-total { font-size: 20px; font-weight: bold; text-align: center; margin-top: 20px; padding: 10px; border-top: 3px double #2c3e50; color: #2c3e50; }
-                    .no-print { width: 100%; max-width: 400px; margin-top: 40px; display: flex; flex-direction: column; gap: 15px; text-align: center;}
-                    .btn-imp { padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%;}
-                    .btn-cerrar { padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; width: 100%;}
+                    .resumen { margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 10px; border: 1px solid #ddd; }
+                    .final-total { font-size: 16px; font-weight: bold; text-align: center; margin-top: 15px; padding: 10px; border-top: 3px double #2c3e50; }
+                    .no-print { width: 100%; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+                    .btn-imp { padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; }
                     @media print { .no-print { display: none; } }
                 </style>
             </head>
             <body>
                 <div class="report-container">
-                    <h1>REPORTE VIAL</h1>
-                    <p><b>Proyecto:</b> ${cur.nombre.toUpperCase()}</p>
-                    <p><b>Fecha:</b> ${new Date().toLocaleDateString()}</p>
+                    <h1>REPORTE VIAL - ${cur.nombre.toUpperCase()}</h1>
+                    <p style="font-size: 10px; text-align:center;"><b>Fecha:</b> ${new Date().toLocaleDateString()}</p>
                     <table>
-                        <thead><tr><th>N°</th><th>Intervalo</th><th>Séd</th><th>Pic</th><th>C-ci</th><th>Cam</th><th>Bus</th><th>Ras</th></tr></thead>
+                        <thead>
+                            <tr><th>N°</th><th>Hora</th><th>Per</th><th>Mot</th><th>Sed</th><th>Pic</th><th>C-ci</th><th>Cam</th><th>Bus</th><th>Ras</th><th style="background:#000">Tot</th></tr>
+                        </thead>
                         <tbody>${tablaFilas}</tbody>
                     </table>
                     <div class="resumen">
-                        <table>
-                            <thead><tr><th>Categoría</th><th>Cant.</th><th>%</th></tr></thead>
+                        <table style="font-size: 10px;">
+                            <thead><tr><th>Categoría</th><th>Cant.</th></tr></thead>
                             <tbody>
-                                <tr><td>🚗 Sedanes</td><td>${t.s}</td><td>${calcPorc(t.s)}</td></tr>
-                                <tr><td>🛻 Pickups</td><td>${t.p}</td><td>${calcPorc(t.p)}</td></tr>
-                                <tr><td>🚛 Camioncitos</td><td>${t.m}</td><td>${calcPorc(t.m)}</td></tr>
-                                <tr><td>🚚 Camiones</td><td>${t.c}</td><td>${calcPorc(t.c)}</td></tr>
-                                <tr><td>🚌 Autobuses</td><td>${t.b}</td><td>${calcPorc(t.b)}</td></tr>
-                                <tr><td>🛣️ Rastras</td><td>${t.r}</td><td>${calcPorc(t.r)}</td></tr>
+                                <tr><td>🚶 Personas</td><td>${t.per}</td></tr>
+                                <tr><td>🏍️ Motos</td><td>${t.mot}</td></tr>
+                                <tr><td>🚗 Sedanes</td><td>${t.sed}</td></tr>
+                                <tr><td>🛻 Pickups</td><td>${t.pic}</td></tr>
+                                <tr><td>🚛 C-cito</td><td>${t.min}</td></tr>
+                                <tr><td>🚚 Camiones</td><td>${t.tru}</td></tr>
+                                <tr><td>🚌 Autobús</td><td>${t.bus}</td></tr>
+                                <tr><td>🛣️ Rastra</td><td>${t.tra}</td></tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="final-total">TOTAL: ${totalG} VEHÍCULOS</div>
+                    <div class="final-total">TOTAL GENERAL: ${totalG}</div>
                 </div>
                 <div class="no-print">
-                    <button class="btn-imp" onclick="window.print()">🖨️ IMPRIMIR / GUARDAR COMO PDF</button>
-                    <button class="btn-cerrar" onclick="window.close()">❌ CERRAR Y VOLVER AL CONTEO</button>
+                    <button class="btn-imp" onclick="window.print()">🖨️ IMPRIMIR / PDF</button>
+                    <button class="btn-imp" style="background:#e74c3c" onclick="window.close()">❌ CERRAR</button>
                 </div>
             </body>
             </html>
