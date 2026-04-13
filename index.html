@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reporte Vial Pro</title>
 
     <link rel="manifest" href="manifest.json">
@@ -201,9 +201,7 @@
         cur.bloques.forEach((bl, i) => {
             let d = bl.datos;
             let subTotal = (d.persona||0) + (d.moto||0) + (d.sedan||0) + (d.pickup||0) + (d.mini||0) + (d.truck||0) + (d.bus||0) + (d.trailer||0);
-            
-            tablaFilas += `<tr><td>${i+1}</td><td>${bl.ini}-${bl.fin}</td><td>${d.persona||0}</td><td>${d.moto||0}</td><td>${d.sedan||0}</td><td>${d.pickup||0}</td><td>${d.mini||0}</td><td>${d.truck||0}</td><td>${d.bus||0}</td><td>${d.trailer||0}</td><td style="background:#ddd"><b>${subTotal}</b></td></tr>`;
-            
+            tablaFilas += `<tr><td>${i+1}</td><td>${bl.ini}-${bl.fin}</td><td>${d.persona||0}</td><td>${d.moto||0}</td><td>${d.sedan||0}</td><td>${d.pickup||0}</td><td>${d.mini||0}</td><td>${d.truck||0}</td><td>${d.bus||0}</td><td>${d.trailer||0}</td><td style="background:#eee"><b>${subTotal}</b></td></tr>`;
             t.per += d.persona||0; t.mot += d.moto||0; t.sed += d.sedan||0; t.pic += d.pickup||0; t.min += d.mini||0; t.tru += d.truck||0; t.bus += d.bus||0; t.tra += d.trailer||0;
         });
         let totalG = t.per + t.mot + t.sed + t.pic + t.min + t.tru + t.bus + t.tra;
@@ -213,52 +211,70 @@
             <html>
             <head>
                 <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
                 <title>Reporte ${cur.nombre}</title>
                 <style>
-                    body { font-family: sans-serif; padding: 5px; color: #333; display: flex; flex-direction: column; align-items: center; margin: 0; }
-                    .report-container { width: 100%; max-width: 98%; box-sizing: border-box; }
-                    h1 { text-align: center; color: #2c3e50; margin: 10px 0; font-size: 1.2rem; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 9px; }
-                    th, td { border: 1px solid #ddd; padding: 4px; text-align: center; }
-                    th { background-color: #2c3e50; color: white; }
-                    .resumen { margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 10px; border: 1px solid #ddd; }
-                    .final-total { font-size: 16px; font-weight: bold; text-align: center; margin-top: 15px; padding: 10px; border-top: 3px double #2c3e50; }
-                    .no-print { width: 100%; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-                    .btn-imp { padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; }
-                    @media print { .no-print { display: none; } }
+                    body { font-family: sans-serif; padding: 10px; color: #333; margin: 0; background: white; }
+                    .report-container { width: 100%; max-width: 1000px; margin: auto; }
+                    h1 { text-align: center; color: #2c3e50; font-size: 1.4rem; margin-bottom: 5px; }
+                    .info-meta { text-align: center; font-size: 12px; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+                    
+                    /* Contenedor con scroll para que la tabla no se haga chiquita */
+                    .tabla-scroll { width: 100%; overflow-x: auto; border: 1px solid #ddd; border-radius: 5px; }
+                    
+                    table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 13px; }
+                    th, td { border: 1px solid #ddd; padding: 8px 4px; text-align: center; }
+                    th { background-color: #2c3e50; color: white; font-weight: bold; }
+                    
+                    .resumen { margin-top: 25px; max-width: 300px; }
+                    .final-total { font-size: 20px; font-weight: bold; text-align: center; margin-top: 25px; padding: 15px; border-top: 4px double #2c3e50; color: #2c3e50; }
+                    
+                    .no-print { position: sticky; bottom: 0; background: white; padding: 15px; display: flex; flex-direction: column; gap: 10px; border-top: 2px solid #ddd; margin-top: 20px; }
+                    .btn-imp { padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; width: 100%; }
+                    
+                    @media print { .no-print { display: none; } .tabla-scroll { overflow: visible; } table { min-width: 100%; font-size: 10px; } }
                 </style>
             </head>
             <body>
                 <div class="report-container">
-                    <h1>REPORTE VIAL - ${cur.nombre.toUpperCase()}</h1>
-                    <p style="font-size: 10px; text-align:center;"><b>Fecha:</b> ${new Date().toLocaleDateString()}</p>
-                    <table>
-                        <thead>
-                            <tr><th>N°</th><th>Hora</th><th>Per</th><th>Mot</th><th>Sed</th><th>Pic</th><th>C-ci</th><th>Cam</th><th>Bus</th><th>Ras</th><th style="background:#000">Tot</th></tr>
-                        </thead>
-                        <tbody>${tablaFilas}</tbody>
-                    </table>
+                    <h1>REPORTE DE AFORO VIAL</h1>
+                    <div class="info-meta">
+                        <b>Proyecto:</b> ${cur.nombre.toUpperCase()}<br>
+                        <b>Fecha de Emisión:</b> ${new Date().toLocaleDateString()}
+                    </div>
+
+                    <div class="tabla-scroll">
+                        <table>
+                            <thead>
+                                <tr><th>N°</th><th>Intervalo</th><th>Per</th><th>Mot</th><th>Sed</th><th>Pic</th><th>C-ci</th><th>Cam</th><th>Bus</th><th>Ras</th><th style="background:#444">TOT</th></tr>
+                            </thead>
+                            <tbody>${tablaFilas}</tbody>
+                        </table>
+                    </div>
+
                     <div class="resumen">
-                        <table style="font-size: 10px;">
-                            <thead><tr><th>Categoría</th><th>Cant.</th></tr></thead>
+                        <h4 style="margin-bottom:5px;">Resumen por Categoría:</h4>
+                        <table>
+                            <thead><tr><th>Tipo</th><th>Total</th></tr></thead>
                             <tbody>
                                 <tr><td>🚶 Personas</td><td>${t.per}</td></tr>
-                                <tr><td>🏍️ Motos</td><td>${t.mot}</td></tr>
+                                <tr><td>🏍️ Motocicletas</td><td>${t.mot}</td></tr>
                                 <tr><td>🚗 Sedanes</td><td>${t.sed}</td></tr>
                                 <tr><td>🛻 Pickups</td><td>${t.pic}</td></tr>
-                                <tr><td>🚛 C-cito</td><td>${t.min}</td></tr>
+                                <tr><td>🚛 Camioncitos</td><td>${t.min}</td></tr>
                                 <tr><td>🚚 Camiones</td><td>${t.tru}</td></tr>
-                                <tr><td>🚌 Autobús</td><td>${t.bus}</td></tr>
-                                <tr><td>🛣️ Rastra</td><td>${t.tra}</td></tr>
+                                <tr><td>🚌 Autobuses</td><td>${t.bus}</td></tr>
+                                <tr><td>🛣️ Rastras</td><td>${t.tra}</td></tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="final-total">TOTAL GENERAL: ${totalG}</div>
+
+                    <div class="final-total">GRAN TOTAL: ${totalG} UNIDADES</div>
                 </div>
+
                 <div class="no-print">
-                    <button class="btn-imp" onclick="window.print()">🖨️ IMPRIMIR / PDF</button>
-                    <button class="btn-imp" style="background:#e74c3c" onclick="window.close()">❌ CERRAR</button>
+                    <button class="btn-imp" onclick="window.print()">🖨️ IMPRIMIR / GUARDAR PDF</button>
+                    <button class="btn-imp" style="background:#e74c3c" onclick="window.close()">❌ CERRAR VISTA</button>
                 </div>
             </body>
             </html>
