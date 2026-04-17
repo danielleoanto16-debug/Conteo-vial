@@ -3,246 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Reporte Vial Pro</title>
-
+    
+    <title>CONTADOR VIAL</title>
+    <meta name="theme-color" content="#4a5568">
+    <link rel="manifest" href="manifest.json">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
     <style>
-        :root { --azul: #2c3e50; --celeste: #3498db; --verde: #27ae60; --rojo: #e74c3c; --gris: #f4f7f6; --profesional: #1a252f; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--gris); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .contenedor { background: white; padding: 25px; border-radius: 15px; width: 100%; max-width: 450px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); text-align: center; }
-        input { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        button { border: none; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .btn-full { width: 100%; margin-top: 10px; font-size: 14px; padding: 12px; border-radius: 8px; }
-        .btn-inicio { background: var(--azul); color: white; }
-        .controles-w { display: flex; align-items: center; gap: 10px; }
-        .btn-mas { background: var(--verde); color: white; width: 55px; height: 55px; border-radius: 50%; font-size: 28px; padding: 0; }
-        .btn-menos { background: var(--rojo); color: white; width: 55px; height: 55px; border-radius: 50%; font-size: 28px; padding: 0; }
-        .btn-del { background: var(--rojo); color: white; padding: 5px 10px; font-size: 12px; border-radius: 8px; }
-        .titulo-proyecto { background: black; color: white; padding: 15px; border-radius: 8px; font-weight: bold; display: inline-block; width: 90%; margin-bottom: 10px; font-size: 1.2rem; }
-        .fila-vehiculo { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
-        .conteo-num { font-size: 22px; font-weight: bold; color: var(--azul); }
-        .reloj-badge { display: inline-block; padding: 8px 15px; border-radius: 20px; background: var(--azul); color: white; font-size: 12px; margin: 10px 0; }
-        .card-historial { background: #f9f9f9; padding: 12px; margin-top: 10px; border-radius: 8px; border-left: 4px solid var(--celeste); text-align: left; position: relative; font-size: 13px; }
-        .item-lista { background: #fff; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #ddd; text-align: left; }
-        .btn-lista { width: 100%; margin-top: 5px; padding: 10px; border-radius: 5px; font-size: 14px; }
-
-        /* MODAL DEL REPORTE */
-        #modalReporte { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: white; z-index: 9999; overflow-y: auto; padding: 10px; box-sizing: border-box;
+        :root {
+            --bg-main: #f4f7f6;
+            --bg-card: #ffffff;
+            --pro-blue: #4a5568;
+            --pro-blue-dark: #2d3748;
+            --pro-green: #689f7a;
+            --pro-red: #c57b7b;
+            --text-main: #1a202c;
+            --text-sub: #718096;
+            --border-light: #e2e8f0;
+            --bg-input: #edf2f7;
         }
-        
-        .header-reporte { border: 2px solid var(--profesional); color: var(--profesional); padding: 15px; margin-bottom: 20px; text-align: center; }
-        .header-reporte h1 { margin: 0; font-size: 1.4rem; letter-spacing: 2px; }
 
-        .tabla-scroll { width: 100%; overflow-x: auto; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 13px; }
-        th, td { border: 1px solid #ddd; padding: 8px 4px; text-align: center; }
-        th { background-color: var(--profesional); color: white; }
-        
-        /* ESTILO UNIFICADO PARA TOTALES */
-        .final-total-container { margin-top: 25px; padding: 15px; border-top: 3px double var(--profesional); text-align: center; color: var(--profesional); }
-        .total-estilo { font-size: 20px; font-weight: bold; margin: 5px 0; }
-        
-        @media print { 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .contenedor {
+            background: var(--bg-card);
+            padding: 15px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            box-sizing: border-box;
+            border: 1px solid var(--border-light);
+        }
+
+        h2 { font-weight: 800; color: var(--pro-blue-dark); margin-bottom: 15px; font-size: 20px; }
+
+        input[type="text"] {
+            width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border-light);
+            background: var(--bg-input); border-radius: 10px; box-sizing: border-box;
+        }
+
+        button { border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-full { width: 100%; padding: 12px; border-radius: 10px; margin-top: 8px; font-size: 14px; }
+        .btn-primary { background: var(--pro-blue); color: white; }
+        .btn-secondary { background: var(--bg-input); color: var(--pro-blue-dark); }
+        .btn-danger-soft { background: #fff5f5; color: var(--pro-red); border: 1px solid #fed7d7; }
+
+        .switch-container {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f8fafc; padding: 10px 15px; border-radius: 10px; margin: 10px 0; border: 1px solid var(--border-light); font-size: 14px;
+        }
+
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e0; transition: .3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--pro-green); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .badge-carril { font-size: 10px; padding: 2px 6px; border-radius: 5px; text-transform: uppercase; font-weight: bold; display: inline-block; margin-top: 4px; }
+        .badge-1 { background: #e2e8f0; color: #4a5568; }
+        .badge-2 { background: #dcfce7; color: #166534; }
+
+        .fila-vehiculo { background: #f8fafc; padding: 8px 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border-light); }
+        .header-carriles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; margin-bottom: 10px; color: var(--text-sub); }
+        .controles-w { display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-mas { background: white; color: var(--pro-green); width: 42px; height: 42px; border-radius: 10px; font-size: 20px; border: 1px solid var(--border-light); }
+        .btn-menos { background: white; color: var(--pro-red); width: 36px; height: 36px; border-radius: 8px; font-size: 18px; border: 1px solid var(--border-light); }
+        .conteo-num { font-size: 18px; font-weight: 700; min-width: 30px; color: var(--pro-blue-dark); }
+        .label-v { font-size: 13px; font-weight: 700; margin-bottom: 5px; color: var(--text-main); text-align: left;}
+
+        #pantallaReporte { display: none; background: white; width: 100%; max-width: 800px; padding: 20px; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 20px; }
+        th { background: #f0f0f0; color: #000; padding: 6px; border: 1px solid #000; }
+        td { padding: 6px; border: 1px solid #000; text-align: center; }
+        .resumen-totales { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; text-align: left; }
+        .caja-total { border: 1px solid #000; padding: 10px; border-radius: 5px; }
+        .caja-total h4 { margin: 0 0 5px 0; font-size: 12px; border-bottom: 1px solid #000; }
+        .desglose-vehiculos { font-size: 10px; }
+        .desglose-item { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; }
+
+        @media print {
             body { background: white !important; padding: 0 !important; }
-            .contenedor, #p1, #p2, .no-print { display: none !important; } 
-            #modalReporte { position: absolute !important; top: 0 !important; left: 0 !important; display: block !important; width: 100% !important; height: auto !important; padding: 0 !important; }
-            .tabla-scroll { overflow: visible !important; border: none !important; }
-            table { min-width: 100% !important; font-size: 10px !important; }
+            #p1, #p2, .no-print { display: none !important; }
+            #pantallaReporte { display: block !important; position: absolute; top: 0; left: 0; width: 100%; }
         }
     </style>
 </head>
 <body>
 
     <div id="p1" class="contenedor">
-        <h2>📁 Mis Proyectos</h2>
-        <input type="text" id="nomPro" placeholder="Nuevo punto de control...">
-        <button class="btn-inicio btn-full" onclick="crear()">+ Crear Proyecto</button>
+        <h2>CONTADOR VIAL</h2>
+        <input type="text" id="nomPro" placeholder="Nombre del Punto">
+        <div class="switch-container">
+            <span>Doble Carril</span>
+            <label class="switch"><input type="checkbox" id="checkCarriles"><span class="slider"></span></label>
+        </div>
+        <button class="btn-full btn-primary" onclick="crear()">Crear Proyecto</button>
         <div id="listaPro" style="margin-top:20px;"></div>
     </div>
 
     <div id="p2" class="contenedor" style="display:none">
-        <div class="titulo-proyecto" id="txtTit"></div>
-        <div id="txtReloj" class="reloj-badge">Esperando...</div>
-        
-        <div id="controles">
-            <div class="fila-vehiculo">
-                <div style="text-align:left">🚶 <b>Persona</b><br><span id="c-persona" class="conteo-num">0</span></div>
-                <div class="controles-w"><button class="btn-menos" onclick="add('persona',-1)">-</button><button class="btn-mas" onclick="add('persona',1)">+</button></div>
-            </div>
-            <div class="fila-vehiculo">
-                <div style="text-align:left">🏍️ <b>Moto</b><br><span id="c-moto" class="conteo-num">0</span></div>
-                <div class="controles-w"><button class="btn-menos" onclick="add('moto',-1)">-</button><button class="btn-mas" onclick="add('moto',1)">+</button></div>
-            </div>
-            <div class="fila-vehiculo">
-                <div style="text-align:left">🚗 <b>Sedán</b><br><span id="c-sedan" class="conteo-num">0</span></div>
-                <div class="controles-w"><button class="btn-menos" onclick="add('sedan',-1)">-</button><button class="btn-mas" onclick="add('sedan',1)">+</button></div>
-            </div>
-            <div class="fila-vehiculo">
-                <div style="text-align:left">🛻 <b>Pickup</b><br><span id="c-pickup" class="conteo-num">0</span></div>
-                <div class="controles-w"><button class="btn-menos" onclick="add('pickup',-1)">-</button><button class="btn-mas" onclick="add('pickup',1)">+</button></div>
-            </div>
-            <div class="fila-vehiculo">
-                <div style="text-align:left">🚛 <b>C-cito</b><br><span id="c-mini" class="conteo-num">0</span></div>
-                <div class="controles-w"><button class="btn-menos" onclick="add('mini',-1)">-</button><button class="btn-mas" onclick="add('mini',1)">+</button></div>
-            </div>
-            <div class="fila-vehiculo">
-                <div style="text-align:left">🚚 <b>Camión</b><br><span id="c-truck" class="conteo-num">0</span></div>
-                <div class="controles-w"><button class="btn-menos" onclick="add('truck',-1)">-</button><button class="btn-mas" onclick="add('truck',1)">+</button></div>
-            </div>
-            <div class="fila-vehiculo">
-                <div style="text-align:left">🚌 <b>Autobús</b><br><span id="c-bus" class="conteo-num">0</span></div>
-                <div class="controles-w"><button class="btn-menos" onclick="add('bus',-1)">-</button><button class="btn-mas" onclick="add('bus',1)">+</button></div>
-            </div>
-            <div class="fila-vehiculo">
-                <div style="text-align:left">🛣️ <b>Rastra</b><br><span id="c-trailer" class="conteo-num">0</span></div>
-                <div class="controles-w"><button class="btn-menos" onclick="add('trailer',-1)">-</button><button class="btn-mas" onclick="add('trailer',1)">+</button></div>
-            </div>
+        <div id="txtTit" style="font-size:16px; font-weight:800; color: var(--pro-blue-dark);"></div>
+        <div id="txtReloj" style="color:var(--text-sub); font-size:12px; margin-bottom:10px;">Esperando...</div>
+        <div class="header-carriles">
+            <div>Carril A</div>
+            <div id="titCarrilB">Carril B</div>
         </div>
-
-        <button style="background:var(--celeste); color:white" class="btn-full" onclick="saveBloque()">✅ FINALIZAR BLOQUE</button>
-        <button style="background:var(--azul); color:white" class="btn-full" onclick="generarReporteInterno()">📄 GENERAR REPORTE</button>
-        <button style="background:#95a5a6; color:white; margin-top:15px" class="btn-full" onclick="goHome()">🏠 VOLVER</button>
-
-        <div id="listHist" style="margin-top:30px; text-align:left;"></div>
+        <div id="zonaControles"></div>
+        <button class="btn-full btn-primary" style="background:var(--pro-green);" onclick="saveBloque()">Finalizar Tramo</button>
+        <button class="btn-full btn-primary" onclick="verReporte()">Generar Reporte</button>
+        <button class="btn-full btn-secondary" onclick="goHome()">Volver</button>
+        <div id="listHist" style="margin-top:20px; text-align:left;"></div>
     </div>
 
-    <div id="modalReporte">
-        <div style="max-width:1000px; margin:auto;">
-            <div class="header-reporte">
-                <h1>REPORTE VIAL</h1>
-            </div>
-            <div id="metaReporte" style="text-align:center; font-size:12px; margin-bottom:15px; border-bottom:1px solid #ddd; padding-bottom:10px;"></div>
-            <div class="tabla-scroll">
-                <table>
-                    <thead>
-                        <tr><th>N°</th><th>Intervalo</th><th>Per</th><th>Mot</th><th>Sed</th><th>Pic</th><th>C-ci</th><th>Cam</th><th>Bus</th><th>Ras</th><th style="background:#000; color:white;">TOT</th></tr>
-                    </thead>
-                    <tbody id="bodyReporte"></tbody>
-                </table>
-            </div>
-            <div class="tabla-scroll">
-                <table>
-                    <thead><tr><th colspan="2">RESUMEN POR CATEGORÍA</th></tr></thead>
-                    <tbody id="bodyResumen"></tbody>
-                </table>
-            </div>
-            
-            <div class="final-total-container">
-                <div id="totalVehiculos" class="total-estilo"></div>
-                <div id="totalPersonas" class="total-estilo"></div>
-            </div>
-
-            <div class="no-print" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
-                <button class="btn-full" style="background:#27ae60; color:white; font-size:16px;" onclick="window.print()">🖨️ IMPRIMIR / PDF</button>
-                <button class="btn-full" style="background:#e74c3c; color:white; font-size:16px;" onclick="cerrarReporte()">❌ VOLVER AL CONTADOR</button>
-            </div>
+    <div id="pantallaReporte">
+        <h2 style="margin-bottom: 5px; text-align: center;">REPORTE TÉCNICO DE CONTEO VIAL</h2>
+        <div id="metaReporte" style="margin-bottom:15px; font-size:12px; text-align: center; border-bottom: 1px solid #000; padding-bottom: 10px;"></div>
+        <div style="overflow-x:auto;">
+            <table><thead id="headReporte"></thead><tbody id="bodyReporte"></tbody></table>
+        </div>
+        <div id="seccionTotales" class="resumen-totales"></div>
+        <div class="no-print" style="margin-top:30px; display: flex; gap: 10px;">
+            <button class="btn-full btn-primary" onclick="window.print()">Imprimir PDF</button>
+            <button class="btn-full btn-secondary" onclick="cerrarReporte()">Volver al Conteo</button>
         </div>
     </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('vial_apk_v1')) || [];
+    let db = JSON.parse(localStorage.getItem('vial_apk_v2')) || [];
     let cur = null;
-    let counts = {persona:0, moto:0, sedan:0, pickup:0, mini:0, truck:0, bus:0, trailer:0};
+    let countsA = {}, countsB = {};
     let hIni = null;
+    
+    const tipos = ['persona','moto','sedan','pickup','c.cito','camiones','bus','trailer'];
+    const emojis = {persona:'🚶', moto:'🏍️', sedan:'🚗', pickup:'🛻', 'c.cito':'🚛', camiones:'🚚', bus:'🚌', trailer:'🛣️'};
 
-    function save() { localStorage.setItem('vial_apk_v1', JSON.stringify(db)); }
-    function goHome() { document.getElementById('p1').style.display='block'; document.getElementById('p2').style.display='none'; renderHome(); }
+    function save() { localStorage.setItem('vial_apk_v2', JSON.stringify(db)); }
+    function goHome() { document.getElementById('p1').style.display='block'; document.getElementById('p2').style.display='none'; document.getElementById('pantallaReporte').style.display='none'; renderHome(); }
+    function cerrarReporte() { document.getElementById('pantallaReporte').style.display='none'; document.getElementById('p2').style.display='block'; }
 
     function crear() {
         let n = document.getElementById('nomPro').value;
-        if(!n) return alert("Nombre requerido");
-        cur = { id: Date.now(), nombre: n, bloques: [] };
+        let c2 = document.getElementById('checkCarriles').checked;
+        if(!n) return alert("Ingresa nombre");
+        cur = { id: Date.now(), nombre: n, dobleCarril: c2, bloques: [] };
         db.push(cur); save(); openP(cur.id);
         document.getElementById('nomPro').value = "";
     }
 
     function openP(id) {
         cur = db.find(p => p.id === id);
-        if(!cur) return;
         document.getElementById('txtTit').innerText = cur.nombre.toUpperCase();
+        document.getElementById('titCarrilB').style.visibility = cur.dobleCarril ? 'visible' : 'hidden';
         document.getElementById('p1').style.display='none';
         document.getElementById('p2').style.display='block';
-        resetC(); renderHist();
+        document.getElementById('pantallaReporte').style.display='none';
+        initControles(); resetC(); renderHist();
     }
 
-    function delP(id) {
-        if(confirm("¿Eliminar proyecto completo?")) { db = db.filter(p => p.id !== id); save(); renderHome(); }
+    function initControles() {
+        let html = "";
+        tipos.forEach(t => {
+            html += `<div class="fila-vehiculo">
+                <div class="label-v">${emojis[t]} ${t.toUpperCase()}</div>
+                <div style="display:grid; grid-template-columns: 1fr ${cur.dobleCarril ? '1fr' : '0fr'}; gap:10px;">
+                    <div class="controles-w">
+                        <button class="btn-menos" onclick="add('A','${t}',-1)">-</button>
+                        <span id="cA-${t}" class="conteo-num">0</span>
+                        <button class="btn-mas" onclick="add('A','${t}',1)">+</button>
+                    </div>
+                    <div class="controles-w" style="display:${cur.dobleCarril ? 'flex' : 'none'}">
+                        <button class="btn-menos" onclick="add('B','${t}',-1)">-</button>
+                        <span id="cB-${t}" class="conteo-num">0</span>
+                        <button class="btn-mas" onclick="add('B','${t}',1)">+</button>
+                    </div>
+                </div>
+            </div>`;
+        });
+        document.getElementById('zonaControles').innerHTML = html;
     }
 
-    function delB(idx) {
-        if(confirm("¿Eliminar este tramo?")) { cur.bloques.splice(idx, 1); save(); renderHist(); }
-    }
-
-    function add(t, v) {
-        if(v > 0 && !hIni) {
-            hIni = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            document.getElementById('txtReloj').innerText = "Iniciado: " + hIni;
-            document.getElementById('txtReloj').style.background = "#27ae60";
-        }
-        if(counts[t] + v < 0) return;
-        counts[t] += v;
-        document.getElementById('c-'+t).innerText = counts[t];
+    function add(c, t, v) {
+        if(v > 0 && !hIni) hIni = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        let obj = c === 'A' ? countsA : countsB;
+        if((obj[t] || 0) + v < 0) return;
+        obj[t] = (obj[t] || 0) + v;
+        document.getElementById(`c${c}-${t}`).innerText = obj[t];
     }
 
     function saveBloque() {
-        if(!hIni) return alert("Sin datos.");
-        cur.bloques.push({ ini: hIni, fin: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), datos: {...counts} });
+        if(!hIni) return alert("Sin datos");
+        cur.bloques.push({ ini: hIni, fin: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), dA: {...countsA}, dB: {...countsB} });
         save(); resetC(); renderHist();
     }
 
     function resetC() {
-        counts = {persona:0, moto:0, sedan:0, pickup:0, mini:0, truck:0, bus:0, trailer:0}; hIni = null;
-        document.querySelectorAll('.conteo-num').forEach(e => e.innerText = "0");
-        document.getElementById('txtReloj').innerText = "Esperando...";
-        document.getElementById('txtReloj').style.background = "#2c3e50";
+        tipos.forEach(t => { countsA[t] = 0; countsB[t] = 0; });
+        hIni = null; document.getElementById('txtReloj').innerText = "Esperando registro...";
+        initControles();
     }
 
     function renderHist() {
-        let h = document.getElementById('listHist');
-        h.innerHTML = "<h4>Historial de Tramos</h4>";
+        let h = document.getElementById('listHist'); h.innerHTML = "";
         cur.bloques.slice().reverse().forEach((b, i) => {
             let rIdx = cur.bloques.length - 1 - i;
-            let d = b.datos;
-            h.innerHTML += `<div class="card-historial"><button class="btn-del" style="position:absolute; right:10px; top:10px;" onclick="delB(${rIdx})">X</button><b>T#${rIdx + 1}</b> (${b.ini}-${b.fin})<br>🚶:${d.persona||0}|🏍️:${d.moto||0}|🚗:${d.sedan||0}|🛻:${d.pickup||0}|🚛:${d.mini||0}|🚚:${d.truck||0}|🚌:${d.bus||0}|🛣️:${d.trailer||0}</div>`;
+            h.innerHTML += `<div style="font-size:11px; margin-bottom:5px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+                <span><b>T#${rIdx+1}</b> ${b.ini}-${b.fin}</span>
+                <button style="color:red; background:none; font-size:10px;" onclick="delB(${rIdx})">X</button>
+            </div>`;
         });
     }
+
+    function delB(idx) { if(confirm("¿Borrar?")) { cur.bloques.splice(idx,1); save(); renderHist(); } }
+    function delP(id) { if(confirm("¿Borrar?")) { db = db.filter(p => p.id !== id); save(); renderHome(); } }
 
     function renderHome() {
         let l = document.getElementById('listaPro'); l.innerHTML = "";
         db.slice().reverse().forEach(p => {
-            l.innerHTML += `<div class="item-lista"><b>${p.nombre}</b><button class="btn-lista" onclick="openP(${p.id})" style="background:var(--celeste); color:white;">Abrir</button><button class="btn-lista" onclick="delP(${p.id})" style="background:var(--rojo); color:white;">Eliminar</button></div>`;
+            const carrilTxt = p.dobleCarril ? "2 Carriles" : "1 Carril";
+            const carrilClass = p.dobleCarril ? "badge-2" : "badge-1";
+            l.innerHTML += `<div style="background:#f9f9f9; padding:10px; margin-bottom:8px; border-radius:10px; border:1px solid #ddd; text-align:left;">
+                <b style="font-size:14px; display:block;">${p.nombre}</b>
+                <span class="badge-carril ${carrilClass}">${carrilTxt}</span>
+                <div style="display:flex; gap:5px; margin-top:8px;">
+                    <button class="btn-full btn-primary" style="margin:0; padding:5px; flex:2;" onclick="openP(${p.id})">Abrir</button>
+                    <button class="btn-full btn-danger-soft" style="margin:0; padding:5px; flex:1;" onclick="delP(${p.id})">Borrar</button>
+                </div>
+            </div>`;
         });
     }
 
-    function generarReporteInterno() {
-        if(!cur || cur.bloques.length === 0) return alert("No hay datos.");
-        let t = {per:0, mot:0, sed:0, pic:0, min:0, tru:0, bus:0, tra:0};
-        let filas = "";
-        cur.bloques.forEach((bl, i) => {
-            let d = bl.datos;
-            let subT = (d.persona||0) + (d.moto||0) + (d.sedan||0) + (d.pickup||0) + (d.mini||0) + (d.truck||0) + (d.bus||0) + (d.trailer||0);
-            filas += `<tr><td>${i+1}</td><td>${bl.ini}-${bl.fin}</td><td>${d.persona||0}</td><td>${d.moto||0}</td><td>${d.sedan||0}</td><td>${d.pickup||0}</td><td>${d.mini||0}</td><td>${d.truck||0}</td><td>${d.bus||0}</td><td>${d.trailer||0}</td><td style="background:#ddd"><b>${subT}</b></td></tr>`;
-            t.per+=d.persona||0; t.mot+=d.moto||0; t.sed+=d.sedan||0; t.pic+=d.pickup||0; t.min+=d.mini||0; t.tru+=d.truck||0; t.bus+=d.bus||0; t.tra+=d.trailer||0;
-        });
+    function verReporte() {
+        if(!cur.bloques.length) return alert("Sin datos");
+        const doble = cur.dobleCarril;
+        let h = ""; let b = "";
+        let vTotA = {}, vTotB = {};
+        tipos.forEach(t => { vTotA[t] = 0; vTotB[t] = 0; });
 
-        let totalVehiculos = t.mot + t.sed + t.pic + t.min + t.tru + t.bus + t.tra;
+        const labelsHTML = tipos.map(t => `<th>${t.toUpperCase().substring(0,3)}</th>`).join('');
 
-        document.getElementById('metaReporte').innerHTML = `<b>Proyecto:</b> ${cur.nombre.toUpperCase()}<br><b>Fecha:</b> ${new Date().toLocaleDateString()}`;
-        document.getElementById('bodyReporte').innerHTML = filas;
-        document.getElementById('bodyResumen').innerHTML = `
-            <tr><td>🚶 Personas</td><td>${t.per}</td></tr><tr><td>🏍️ Motos</td><td>${t.mot}</td></tr>
-            <tr><td>🚗 Sedanes</td><td>${t.sed}</td></tr><tr><td>🛻 Pickups</td><td>${t.pic}</td></tr>
-            <tr><td>🚛 Camioncitos</td><td>${t.min}</td></tr><tr><td>🚚 Camiones</td><td>${t.tru}</td></tr>
-            <tr><td>🚌 Autobuses</td><td>${t.bus}</td></tr><tr><td>🛣️ Rastras</td><td>${t.tra}</td></tr>`;
-        
-        document.getElementById('totalVehiculos').innerText = `TOTAL GENERAL VEHÍCULOS: ${totalVehiculos} UNIDADES`;
-        document.getElementById('totalPersonas').innerText = `TOTAL PEATONAL: ${t.per} PERSONAS`;
-        document.getElementById('modalReporte').style.display = 'block';
+        if(!doble) {
+            h = `<tr><th>N°</th><th>Tramo</th>${labelsHTML}<th>TOTAL V.</th></tr>`;
+            cur.bloques.forEach((blo, i) => {
+                let st = 0; let fila = `<tr><td>${i+1}</td><td>${blo.ini}-${blo.fin}</td>`;
+                tipos.forEach(t => { 
+                    let v = blo.dA[t] || 0; fila += `<td>${v}</td>`; vTotA[t] += v;
+                    if(t !== 'persona') st += v; 
+                });
+                fila += `<td><b>${st}</b></td></tr>`; b += fila;
+            });
+        } else {
+            h = `<tr><th>N°</th><th>Tramo</th><th>CAR</th>${labelsHTML}<th>TOTAL V.</th></tr>`;
+            cur.bloques.forEach((blo, i) => {
+                let stA = 0, stB = 0;
+                let fA = `<tr><td rowspan="2">${i+1}</td><td rowspan="2">${blo.ini}-${blo.fin}</td><td>A</td>`;
+                tipos.forEach(t => { let v = blo.dA[t] || 0; fA += `<td>${v}</td>`; vTotA[t] += v; if(t !== 'persona') stA += v; });
+                fA += `<td><b>${stA}</b></td></tr>`;
+                let fB = `<tr><td>B</td>`;
+                tipos.forEach(t => { let v = blo.dB[t] || 0; fB += `<td>${v}</td>`; vTotB[t] += v; if(t !== 'persona') stB += v; });
+                fB += `<td><b>${stB}</b></td></tr>`;
+                b += fA + fB;
+            });
+        }
+
+        const buildDesglose = (datos) => {
+            let html = '<div class="desglose-vehiculos">';
+            tipos.forEach(t => { if(t !== 'persona') html += `<div class="desglose-item"><span>${t.toUpperCase()}</span> <span>${datos[t]}</span></div>`; });
+            return html + '</div>';
+        };
+
+        let totalVehA = Object.values(vTotA).reduce((a,b)=>a+b,0) - vTotA.persona;
+        let totalVehB = Object.values(vTotB).reduce((a,b)=>a+b,0) - vTotB.persona;
+
+        let totHTML = `<div class="caja-total"><h4>TOTAL CARRIL A</h4><p>VEH: ${totalVehA} | PEAT: ${vTotA.persona}</p><hr>${buildDesglose(vTotA)}</div>`;
+        if(doble) {
+            totHTML += `<div class="caja-total"><h4>TOTAL CARRIL B</h4><p>VEH: ${totalVehB} | PEAT: ${vTotB.persona}</p><hr>${buildDesglose(vTotB)}</div>`;
+            totHTML += `<div class="caja-total" style="grid-column: span 2; text-align:center;"><h4>GRAN TOTAL (A + B)</h4><p>Vehículos: ${totalVehA + totalVehB} | Peatones: ${vTotA.persona + vTotB.persona}</p></div>`;
+        }
+
+        document.getElementById('seccionTotales').innerHTML = totHTML;
+        document.getElementById('metaReporte').innerText = `UBICACIÓN: ${cur.nombre} | FECHA: ${new Date().toLocaleDateString()}`;
+        document.getElementById('headReporte').innerHTML = h;
+        document.getElementById('bodyReporte').innerHTML = b;
+        document.getElementById('p2').style.display = 'none';
+        document.getElementById('pantallaReporte').style.display = 'block';
     }
-
-    function cerrarReporte() { document.getElementById('modalReporte').style.display = 'none'; }
-
     renderHome();
 </script>
 </body>
